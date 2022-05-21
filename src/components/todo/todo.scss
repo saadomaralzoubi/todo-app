@@ -1,0 +1,23 @@
+body,
+html {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+}
+.todo-details {
+  display: flex;
+  flex-direction: column;
+
+  header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 0.5em 1em;
+  }
+
+  .item {
+    flex: 1;
+    padding: 1em;
+  }
+}
