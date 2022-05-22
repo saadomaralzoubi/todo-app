@@ -1,62 +1,90 @@
+import useForm from "../../hooks/form.js";
 import { useContext } from "react";
-import { Form, Button, Card } from "react-bootstrap";
-import useForm from "../../hooks/useForm.js";
-import { AuthContext } from "../../context/auth";
+import { Button, Card, Elevation, Switch } from "@blueprintjs/core";
+import { SettingContext } from "../../context/context";
+import { v4 as uuid } from "uuid";
+export default function Form() {
+  const states = useContext(SettingContext);
 
-const TodoForm = (props) => {
-  const authContext = useContext(AuthContext);
-  const [_handleInputChange, _handleSubmit] = useForm(props.handleSubmit);
+  let stringfiedData;
+  function addItem(item) {
+    item.id = uuid();
+    item.complete = false;
+    states.setList([...states.list, item]);
+    stringfiedData = JSON.stringify([...states.list, item]);
+    localStorage.setItem("list", stringfiedData);
+  }
+  function itemPerPages(e) {
+    states.setItemPerPages(e.target.value);
+  }
+  function showComleteToggle() {
+    states.setShowComplete(!states.showComplete);
+  }
+  const { handleChange, handleSubmit } = useForm(addItem);
 
   return (
-    <Card>
-      <Card.Header as="h3">Add Item</Card.Header>
-      <Card.Body>
-        <Form
-          onSubmit={async (e) => {
-            if (authContext.user.capabilities.includes("create")) {
-              await _handleSubmit(e);
-              await props.fetch();
-            } else {
-              alert("You don't have the permession to create!");
-            }
-          }}
-        >
-          <Form.Group>
-            <Form.Label>To Do Item</Form.Label>
-            <Form.Control
-              type="text"
-              name="text"
-              placeholder="Add To Do List Item"
-              onChange={_handleInputChange}
-            />
-          </Form.Group>
-          <Form.Group controlId="formBasicRange">
-            <Form.Label>Difficulty Rating</Form.Label>
-            <Form.Control
-              defaultValue="1"
-              type="range"
-              min="1"
-              max="5"
-              name="difficulty"
-              onChange={_handleInputChange}
-            />
-          </Form.Group>
-          <Form.Group>
-            <Form.Label>Assigned To</Form.Label>
-            <Form.Control
-              type="text"
-              name="assignee"
-              placeholder="Assigned To"
-              onChange={_handleInputChange}
-            />
-          </Form.Group>
-          <Button variant="primary" type="submit">
-            Add Item
-          </Button>
-        </Form>
-      </Card.Body>
-    </Card>
-  );
-};
+    <form onSubmit={handleSubmit}>
+      <Card
+        className="card-submit"
+        elevation={Elevation.TWO}
+        style={{ marginRight: "20px" }}
+      >
+        <h4>Add To Do Item</h4>
 
-export default TodoForm;
+        <label>
+          <p>To Do Item:</p>
+          <input
+            onChange={handleChange}
+            name="text"
+            type="text"
+            placeholder="Item Details"
+          />
+        </label>
+        <hr />
+        <label>
+          <p>Assigned To:</p>
+          <input
+            onChange={handleChange}
+            name="assignee"
+            type="text"
+            placeholder="Assignee Name"
+          />
+        </label>
+        <hr />
+        <label>
+          <p>Difficulty:</p>
+          <input
+            onChange={handleChange}
+            defaultValue={3}
+            type="range"
+            min={1}
+            max={5}
+            name="difficulty"
+          />
+        </label>
+        <hr />
+        <label>
+          <p>items per page:</p>
+          <input
+            onChange={itemPerPages}
+            defaultValue={3}
+            type="range"
+            min={1}
+            max={5}
+            name="items per page"
+          />
+        </label>
+        <hr />
+        <Switch
+          checked={states.showComplete}
+          label="show completed items"
+          onChange={showComleteToggle}
+        />
+        <hr />
+        <label>
+          <Button type="submit">Add Item</Button>
+        </label>
+      </Card>
+    </form>
+  );
+}
